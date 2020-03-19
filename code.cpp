@@ -1,6 +1,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <vector>
 
 #include <iostream>
 
@@ -62,11 +63,9 @@ int main() {
         vector<vector<Point> > contours;
         findContours( mask, contours, RETR_TREE, CHAIN_APPROX_SIMPLE );
         int i = maxContourId(contours);
-        vector<Point> final;
         Point2f center;
         float radius;
-        approxPolyDP( contours[i], final, 10, true);
-        minEnclosingCircle(final, center, radius);
+        minEnclosingCircle(contours[i], center, radius);
         if(radius>10){
             circle( frame, center, 1, Scalar(0,0,255), 3, LINE_AA);
         }
