@@ -1,83 +1,85 @@
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <vector>
-
 #include <iostream>
+#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/videoio.hpp>
+#include <opencv2/highgui.hpp>
 
 using namespace std;
 using namespace cv;
+int main(int argc, char** argv )
+{
+    int lh=80;
+    int ls=100;
+    int lv=20;
 
+    int uh=100;
+    int us=255;
+    int uv=255;
 
-int maxContourId(vector <vector<Point>> contours) {
-    double maxArea = 0;
-    int maxAreaContourId = -1;
-    for (int j = 0; j < contours.size(); j++) {
-        double newArea = contourArea(contours.at(j));
-        if (newArea > maxArea) {
-            maxArea = newArea;
-            maxAreaContourId = j;
-        }
-    }
-    return maxAreaContourId;
-}
-
-int main() {
-
-    VideoCapture capWebcam(0);  
-
-    if (capWebcam.isOpened() == false) {    
-    cout << "error: Webcam connect unsuccessful\n"; 
-    return(0);      
+    VideoCapture cap(0);
+    if(cap.isOpened()==false){
+        cout<<"cannot connect to camera"<<endl;
+        cin.get();
+        return -1;
     }
 
-    Mat frame;
-    Mat hsv;    
-    Mat mask; 
+    double sum_time_count=0;
+    int n=0;
 
-    char charCheckForEscKey = 0;
 
-    int lowH = 80;
-    int highH = 100;
+    bool grabbed=1;
+    while(grabbed){
 
-    int lowS = 100;
-    int highS = 255;
+        int64 e1 = getTickCount();
 
-    int lowV = 20;
-    int highV = 225;
- 
-    while (charCheckForEscKey != 27 && capWebcam.isOpened()) {  
-        bool blnFrameReadSuccessfully = capWebcam.read(frame); 
+        Mat frame;
+        Mat mask;
+        grabbed = cap.read(frame);
 
-        if (!blnFrameReadSuccessfully || frame.empty()) {    
-             cout << "error: frame can't read \n"; 
-        break;      
-        }
+        cvtColor(frame,mask,COLOR_BGR2HSV);
+        inRange(mask,Scalar(lh,ls,lv),Scalar(uh,us,uv),mask);
+        erode(mask, mask, Mat(), Point(), 3);
+        dilate(mask, mask, Mat(), Point(), 3);
 
-        cvtColor(frame, hsv, COLOR_BGR2HSV);    
 
-        inRange(hsv, Scalar(lowH, lowS, lowV), Scalar(highH, highS, highV), mask);    
-        erode(mask, mask, 0);
-        dilate(mask, mask, 0); 
+        vector<vector<Point> > cnts;
 
-        vector<vector<Point> > contours;
-        findContours( mask, contours, RETR_TREE, CHAIN_APPROX_SIMPLE );
-        int i = maxContourId(contours);
+        findContours( mask, cnts, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE );
+
         Point2f center;
         float radius;
-        minEnclosingCircle(contours[i], center, radius);
-        if(radius>10){
-            circle( frame, center, 1, Scalar(0,0,255), 3, LINE_AA);
+        if(cnts.size() > 0){
+            double max=0;
+            int max_index=0;
+            int i=0;
+            for (int i = 0; i < cnts.size(); i++) {
+                double newArea = contourArea(cnts.at(i));
+                if (newArea > max) {
+                    max = newArea;
+                    max_index = i;
+                } 
+            }
+
+            minEnclosingCircle(cnts[i],center,radius);
+
+            if(radius > 10)
+                circle( frame, center, radius, (255,255,0), 2 );
         }
 
-        namedWindow("frame");
-        namedWindow("mask"); 
 
-        imshow("frame", frame);    
-        imshow("mask", mask);
+        imshow("Mask",mask);
+        imshow("Frame", frame);
 
-        charCheckForEscKey = waitKey(1);     
+
+        int64 e2 = getTickCount();
+        double t = (e2-e1)/getTickFrequency();
+        sum_time_count+=t;n++;
+        cout<<"frame time: "<<t<<" avg time: "<<sum_time_count/n<<" total frames: "<<n<<" cpp "<<endl;
+
+        if(waitKey(10) == 'q'){
+            grabbed = false;
+        }
     }
- 
- return(0);           
+
+    return 0;
 }
