@@ -19,8 +19,8 @@ while grabbed:
 
     mask = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(mask, greenLower, greenUpper)
-    mask = cv2.erode(mask, None, iterations=2)
-    mask = cv2.dilate(mask, None, iterations=2)
+    # mask = cv2.erode(mask, None, iterations=2)
+    # mask = cv2.dilate(mask, None, iterations=2)
 
     cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
 
@@ -39,7 +39,7 @@ while grabbed:
     t=(e2-e1)/cv2.getTickFrequency()
     sum_time_count += t
     n=n+1
-    print("frame time: ",t," avg time: ",sum_time_count/n," total frames: ",n," cpp ")
+    print("frame time: ",t," avg time: ",sum_time_count/n," total frames: ",n," python ")
     key = cv2.waitKey(1) & 0xFF
 
     if key == ord('q'):

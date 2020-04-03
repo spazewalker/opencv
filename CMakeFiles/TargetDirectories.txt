@@ -1,0 +1,3 @@
+/home/shivanshu/Desktop/OpenCV/CMakeFiles/rebuild_cache.dir
+/home/shivanshu/Desktop/OpenCV/CMakeFiles/code.dir
+/home/shivanshu/Desktop/OpenCV/CMakeFiles/edit_cache.dir
