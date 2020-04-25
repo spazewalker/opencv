@@ -9,8 +9,11 @@
 * HSV_plot.png          : Plot to decide HSV Values
 * objectdetect.py       : (Blue) Ball detection in python
 * clean                 : script to clean up the CMake files
-C++ code is build by cmake
-'''
+
+### C++ code is build by cmake
+command to build and run it
+```
 cmake .
 make
-'''
+./code
+```
